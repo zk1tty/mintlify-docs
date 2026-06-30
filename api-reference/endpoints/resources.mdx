@@ -6,7 +6,7 @@ description: "Retrieve a paginated list of all resources. Supports filtering by 
 
 Use `GET /resources` to retrieve a paginated list of all resources in your account. You can narrow results by status, control the sort order, and page through large datasets using the `page` and `per_page` query parameters.
 
-```
+```text
 GET https://api.google.com/v1/resources
 ```
 
@@ -99,3 +99,10 @@ A successful request returns HTTP `200` with a JSON body containing a `data` arr
   }
 }
 ```
+
+## Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `400 Bad Request` | `invalid_parameter` | A query parameter has an invalid value (for example, `per_page` exceeds `100` or `order` is not `asc` or `desc`). Check the error message for details. |
+| `401 Unauthorized` | `authentication_required` | The `Authorization` header is missing or the Bearer token is invalid. Verify your API key and retry. |

@@ -6,7 +6,7 @@ description: "Fetch a single resource by its ID. Returns the full resource objec
 
 Use `GET /resources/{id}` to fetch a specific resource by its unique ID. The response includes the complete resource object — all fields, metadata, and timestamps — exactly as stored.
 
-```
+```text
 GET https://api.google.com/v1/resources/{id}
 ```
 
@@ -80,4 +80,5 @@ A successful request returns HTTP `200` with the resource object nested under `d
 
 | Status | Code | Description |
 |--------|------|-------------|
+| `401 Unauthorized` | `authentication_required` | The `Authorization` header is missing or the Bearer token is invalid. Verify your API key and retry. |
 | `404 Not Found` | `resource_not_found` | No resource exists with the provided ID. Verify the ID is correct and belongs to your account. |

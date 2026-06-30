@@ -1,5 +1,5 @@
 ---
-title: "Google REST API Reference"
+title: "Google REST API Reference: Base URL, Versioning, Conventions"
 sidebarTitle: "Introduction"
 description: "Complete reference for the Google REST API. Covers base URL, versioning, request format, response format, and conventions used throughout the API."
 ---
@@ -10,7 +10,7 @@ The Google REST API gives you programmatic access to all Google resources. Wheth
 
 All API requests are made to the following base URL:
 
-```
+```text
 https://api.google.com/v1
 ```
 
@@ -59,5 +59,17 @@ Official SDKs are available for the most popular languages and frameworks, handl
   </Card>
   <Card title="Create Resource" icon="plus" href="/api-reference/endpoints/create">
     POST /resources
+  </Card>
+  <Card title="Retrieve Resource" icon="magnifying-glass" href="/api-reference/endpoints/retrieve">
+    GET /resources/{id}
+  </Card>
+  <Card title="Update Resource" icon="pen" href="/api-reference/endpoints/update">
+    PATCH /resources/{id}
+  </Card>
+  <Card title="Delete Resource" icon="trash" href="/api-reference/endpoints/delete">
+    DELETE /resources/{id}
+  </Card>
+  <Card title="Webhooks Guide" icon="webhook" href="/guides/webhooks">
+    POST /webhooks — real-time event notifications
   </Card>
 </CardGroup>

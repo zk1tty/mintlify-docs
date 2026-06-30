@@ -6,7 +6,7 @@ description: "Update one or more fields on an existing resource. Only the fields
 
 Use `PATCH /resources/{id}` to update an existing resource. The API uses partial updates — only the fields you include in the request body are changed. Fields you omit remain exactly as they were, so you never need to re-send the full resource object.
 
-```
+```text
 PATCH https://api.google.com/v1/resources/{id}
 ```
 
@@ -49,6 +49,40 @@ curl -X PATCH https://api.google.com/v1/resources/res_01J9KXPQ3N2M4R5T6W7Y8Z \
 
 A successful request returns HTTP `200` with the full updated resource object nested under `data`.
 
+<ResponseField name="data" type="object">
+  The full resource object after applying your changes.
+
+  <Expandable title="data fields">
+    <ResponseField name="data.id" type="string">
+      The unique identifier of this resource.
+    </ResponseField>
+
+    <ResponseField name="data.name" type="string">
+      The display name of the resource.
+    </ResponseField>
+
+    <ResponseField name="data.description" type="string">
+      The optional description attached to the resource.
+    </ResponseField>
+
+    <ResponseField name="data.status" type="string">
+      The current status of the resource: `active` or `inactive`.
+    </ResponseField>
+
+    <ResponseField name="data.metadata" type="object">
+      The full set of key-value pairs associated with this resource after the merge.
+    </ResponseField>
+
+    <ResponseField name="data.created_at" type="string">
+      ISO 8601 timestamp for when the resource was created.
+    </ResponseField>
+
+    <ResponseField name="data.updated_at" type="string">
+      ISO 8601 timestamp for when the resource was last updated (reflects this change).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
 ```json
 {
   "data": {
@@ -67,3 +101,11 @@ A successful request returns HTTP `200` with the full updated resource object ne
 <Tip>
   Metadata updates are **merged**, not replaced. If your resource already has `{ "project": "demo" }` and you send `{ "archived": "true" }`, the result is `{ "project": "demo", "archived": "true" }`. To remove a specific key, include it in your request with a `null` value: `{ "project": null }`.
 </Tip>
+
+## Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `400 Bad Request` | `invalid_parameter` | A field value is invalid (for example, `name` is empty or `status` is not `active` or `inactive`). Check the error message for the specific field. |
+| `401 Unauthorized` | `authentication_required` | The `Authorization` header is missing or the Bearer token is invalid. Verify your API key and retry. |
+| `404 Not Found` | `resource_not_found` | No resource exists with the provided ID. Verify the ID is correct and belongs to your account. |

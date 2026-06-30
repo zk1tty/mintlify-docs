@@ -22,7 +22,7 @@ Both limits are enforced independently. Exceeding either one triggers a `429` re
 
 Every response from the Google API includes three headers that tell you exactly where you stand against your quota:
 
-```
+```http
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45
 X-RateLimit-Reset: 1705312260
@@ -48,7 +48,7 @@ When you exceed your rate limit, the API responds with a `429` status and a JSON
 }
 ```
 
-The `retry_after` value is the number of seconds to wait before sending the next request. For a more robust implementation, use **exponential backoff** so that repeated `429` responses don't hammer the API as soon as the window opens:
+The `retry_after` value is the number of seconds to wait before sending the next request. Respect this value in your client, and layer on **exponential backoff** so that repeated `429` responses don't hammer the API as soon as the window opens:
 
 ```python
 import time, requests
@@ -57,14 +57,16 @@ def api_request_with_retry(url, headers, max_retries=3):
     for attempt in range(max_retries):
         response = requests.get(url, headers=headers)
         if response.status_code == 429:
-            wait = 2 ** attempt
+            # Honour the API's retry_after hint, then add exponential backoff
+            retry_after = response.json().get("error", {}).get("retry_after", 1)
+            wait = retry_after * (2 ** attempt)
             time.sleep(wait)
             continue
         return response
     raise Exception("Max retries exceeded")
 ```
 
-This example waits 1 second after the first `429`, 2 seconds after the second, and 4 seconds after the third before giving up. Adjust `max_retries` and the base wait time to suit your latency requirements.
+This example reads `retry_after` from the response body and multiplies it by an exponentially growing factor — so if the API says wait 15 seconds, the client waits 15 s on the first retry, 30 s on the second, and 60 s on the third before giving up. Adjust `max_retries` to suit your latency requirements.
 
 <Tip>
   Two of the easiest ways to stay within your quota are **caching responses** and **batching requests**. If the same resource is requested frequently, store the response locally and revalidate only when necessary. Where the API supports bulk operations, send a single request instead of many individual ones — you'll use fewer requests and reduce latency at the same time.

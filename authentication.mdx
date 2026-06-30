@@ -1,5 +1,5 @@
 ---
-title: "Authenticate Requests to Google API"
+title: "API Authentication: Secure Requests with Bearer Tokens"
 sidebarTitle: "Authentication"
 description: "Google API uses API keys passed as Bearer tokens. Learn how to generate your key, pass it in requests, and rotate or revoke it when needed."
 ---
@@ -19,7 +19,7 @@ You generate and manage API keys from the Google developer dashboard. Each key i
 
 Include your API key in the `Authorization` header of every request using the `Bearer` scheme.
 
-```
+```http
 Authorization: Bearer YOUR_API_KEY
 ```
 

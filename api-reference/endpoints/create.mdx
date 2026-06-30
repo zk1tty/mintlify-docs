@@ -6,7 +6,7 @@ description: "Create a new resource. Provide a name and optional fields; returns
 
 Use `POST /resources` to create a new resource in your account. You must provide a `name`; all other fields are optional. On success, the API returns the full resource object including its system-assigned ID and timestamps.
 
-```
+```text
 POST https://api.google.com/v1/resources
 ```
 
@@ -46,6 +46,40 @@ curl -X POST https://api.google.com/v1/resources \
 
 A successful request returns HTTP `201 Created` with the newly created resource object nested under `data`.
 
+<ResponseField name="data" type="object">
+  The newly created resource object.
+
+  <Expandable title="data fields">
+    <ResponseField name="data.id" type="string">
+      The unique identifier assigned to this resource.
+    </ResponseField>
+
+    <ResponseField name="data.name" type="string">
+      The display name of the resource.
+    </ResponseField>
+
+    <ResponseField name="data.description" type="string">
+      The optional description attached to the resource.
+    </ResponseField>
+
+    <ResponseField name="data.status" type="string">
+      The current status of the resource: `active` or `inactive`.
+    </ResponseField>
+
+    <ResponseField name="data.metadata" type="object">
+      The key-value pairs associated with this resource.
+    </ResponseField>
+
+    <ResponseField name="data.created_at" type="string">
+      ISO 8601 timestamp for when the resource was created.
+    </ResponseField>
+
+    <ResponseField name="data.updated_at" type="string">
+      ISO 8601 timestamp for when the resource was last updated.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
 ```json
 {
   "data": {
@@ -64,3 +98,11 @@ A successful request returns HTTP `201 Created` with the newly created resource 
 <Note>
   To safely retry a creation request without risking duplicate resources, include an `Idempotency-Key` header with a unique value (for example, a UUID you generate client-side). If the API receives a second request with the same key within 24 hours, it returns the original response instead of creating a new resource.
 </Note>
+
+## Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `400 Bad Request` | `invalid_parameter` | A required field is missing or a field value is invalid (for example, `name` is empty or exceeds 255 characters). Check the error message for the specific field. |
+| `401 Unauthorized` | `authentication_required` | The `Authorization` header is missing or the Bearer token is invalid. Verify your API key and retry. |
+| `422 Unprocessable Entity` | `validation_error` | The request body is well-formed but fails business-logic validation. The response body includes a `errors` array describing each failing field. |

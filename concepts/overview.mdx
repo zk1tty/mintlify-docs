@@ -14,7 +14,7 @@ The Google API models everything as a **resource** — a discrete object with a 
 
 All API requests target the following base URL:
 
-```
+```text
 https://api.google.com/v1
 ```
 
@@ -55,8 +55,9 @@ The Google API uses standard HTTP methods to convey the intent of each operation
 
 | Method | Use | Example |
 |--------|-----|---------|
-| `GET` | Read a resource or list | `GET /resources` |
-| `POST` | Create a resource | `POST /resources` |
+| `GET` | List resources | `GET /resources` |
+| `POST` | Create a resource or register a webhook | `POST /resources`, `POST /webhooks` |
+| `GET` | Retrieve a single resource | `GET /resources/{id}` |
 | `PATCH` | Update a resource | `PATCH /resources/{id}` |
 | `DELETE` | Delete a resource | `DELETE /resources/{id}` |
 

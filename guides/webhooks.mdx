@@ -1,7 +1,7 @@
 ---
-title: "Receive Real-Time Events with Google Webhooks"
+title: "Receive Real-Time Event Notifications with Webhooks"
 sidebarTitle: "Webhooks"
-description: "Set up webhooks to receive real-time notifications when resources are created, updated, or deleted in the Google API."
+description: "Set up and verify Google API webhooks to receive real-time notifications when resources are created, updated, or deleted — without polling."
 ---
 
 Webhooks let Google push event notifications to your server in real time, so you don't need to poll the API repeatedly to detect changes. Whenever a resource is created, updated, or deleted, Google sends an HTTP `POST` request to a URL you register — your server processes the payload and responds immediately.
@@ -87,6 +87,7 @@ def verify_signature(raw_body: bytes, secret: str, signature_header: str) -> boo
 
 
 # Example usage inside a Flask route
+import os
 from flask import Flask, request, abort
 
 app = Flask(__name__)
@@ -110,11 +111,24 @@ You can find your webhook secret in the Google dashboard under **Settings → We
 Your endpoint must return an HTTP `200 OK` within **5 seconds** of receiving a delivery. If your handler needs to perform slow operations — like writing to a database or calling a third-party API — acknowledge the webhook immediately and process the work asynchronously in a background job:
 
 ```python
+import os
 from threading import Thread
+from flask import Flask, request, abort
+
+app = Flask(__name__)
+WEBHOOK_SECRET = os.environ['GOOGLE_WEBHOOK_SECRET']
+
+def process_event(event):
+    # Add your event-handling logic here
+    pass
 
 @app.route('/webhooks/google', methods=['POST'])
 def handle_webhook():
-    # Verify signature first (see above)
+    # Verify signature first (see the section above)
+    signature = request.headers.get('X-Google-Signature', '')
+    if not verify_signature(request.get_data(), WEBHOOK_SECRET, signature):
+        abort(403)
+
     event = request.get_json()
 
     # Kick off background processing and respond at once

@@ -6,7 +6,7 @@ description: "Permanently delete a resource by its ID. This action cannot be und
 
 Use `DELETE /resources/{id}` to permanently delete a resource from your account. This action is irreversible — once deleted, the resource and all associated metadata cannot be recovered. If you are unsure, consider setting the resource's status to `inactive` first.
 
-```
+```text
 DELETE https://api.google.com/v1/resources/{id}
 ```
 
@@ -27,7 +27,7 @@ curl -X DELETE https://api.google.com/v1/resources/res_01J9KXPQ3N2M4R5T6W7Y8Z \
 
 A successful deletion returns HTTP `204 No Content` with an empty response body. No JSON is returned.
 
-```
+```text
 HTTP/1.1 204 No Content
 ```
 
@@ -39,5 +39,6 @@ HTTP/1.1 204 No Content
 
 | Status | Code | Description |
 |--------|------|-------------|
-| `404 Not Found` | `resource_not_found` | No resource exists with the provided ID. Verify the ID is correct and belongs to your account. |
+| `401 Unauthorized` | `authentication_required` | The `Authorization` header is missing or the Bearer token is invalid. Verify your API key and retry. |
 | `403 Forbidden` | `insufficient_scope` | Your API key does not have the `resources:delete` scope required to perform deletions. Generate a new key with the appropriate permissions in your dashboard. |
+| `404 Not Found` | `resource_not_found` | No resource exists with the provided ID. Verify the ID is correct and belongs to your account. |

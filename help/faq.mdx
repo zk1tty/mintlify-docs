@@ -1,18 +1,54 @@
 ---
-title: "Frequently Asked Questions about Google API"
+title: "Google API FAQ: Authentication, Resources, and Webhooks"
 sidebarTitle: "FAQ"
-description: "Answers to common questions about Google API authentication, rate limits, billing, and supported features."
+description: "Answers to common questions about Google API authentication, rate limits, billing, supported data formats, and working with resources and webhooks."
 ---
 
-Whether you're just getting started or scaling your integration, this page gives you quick answers to the most common questions developers ask about the Google API — from obtaining your first API key to understanding rate limits, billing options, and supported data formats.
+Whether you're just getting started or scaling your integration, this page gives you quick answers to the most common questions developers ask about the Google API — from obtaining your first API key to understanding rate limits, billing options, supported data formats, and how to register webhook endpoints.
 
 <AccordionGroup>
   <Accordion title="How do I get an API key?">
     To get an API key, sign up for a Google API account at our website. Once you're logged in, navigate to **Settings > API Keys** and click **New API Key**. Your key is generated instantly and ready to use in your requests.
   </Accordion>
 
+  <Accordion title="How do I authenticate my requests?">
+    All requests to the Google API must include a Bearer token in the `Authorization` header. Pass your API key as the token value:
+
+    ```http
+    Authorization: Bearer YOUR_API_KEY
+    ```
+
+    Requests made without this header, or with a malformed or revoked key, receive a `401 Unauthorized` response.
+  </Accordion>
+
   <Accordion title="Are my API keys tied to a specific environment?">
-    Yes. Each API key is scoped to a specific environment. You should create separate keys for development, staging, and production to keep your environments isolated and avoid accidentally affecting live data during testing.
+    Yes. Each API key is scoped to a specific environment. You should create separate keys for development and production to keep your environments isolated and avoid accidentally affecting live data during testing.
+  </Accordion>
+
+  <Accordion title="How do I create, retrieve, update, and delete resources?">
+    The Google API exposes a standard set of CRUD endpoints for managing resources:
+
+    | Action | Method | Endpoint |
+    |---|---|---|
+    | List all resources | `GET` | `/resources` |
+    | Create a resource | `POST` | `/resources` |
+    | Retrieve a resource | `GET` | `/resources/{id}` |
+    | Update a resource | `PATCH` | `/resources/{id}` |
+    | Delete a resource | `DELETE` | `/resources/{id}` |
+
+    For `POST` and `PATCH` requests, send your data as a JSON body and include the `Content-Type: application/json` header.
+  </Accordion>
+
+  <Accordion title="How do I register a webhook endpoint?">
+    Send a `POST` request to `/webhooks` with a JSON body that specifies the URL you want to receive event notifications:
+
+    ```json
+    {
+      "url": "https://your-server.example.com/webhook"
+    }
+    ```
+
+    Your endpoint must be publicly accessible and must respond with `200 OK` to acknowledge each delivery. See the [Troubleshooting](/help/troubleshooting) guide if your endpoint is not receiving events.
   </Accordion>
 
   <Accordion title="What happens if I exceed my rate limit?">

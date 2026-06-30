@@ -1,5 +1,5 @@
 ---
-title: "Google API Error Codes and Responses"
+title: "Google API Errors: Status Codes and Error Response Format"
 sidebarTitle: "Errors"
 description: "Complete reference for Google API error codes, HTTP status codes, and the JSON error response format including validation and rate limit errors."
 ---
@@ -35,7 +35,7 @@ All error responses wrap their payload in a top-level `error` key:
 </ResponseField>
 
 <ResponseField name="request_id" type="string">
-  Unique identifier for this request. Include this value when contacting support — it allows the Google team to locate the exact request in internal logs.
+  Unique identifier for this request. Include this value when contacting support — it allows the Google team to locate and investigate the exact request quickly.
 </ResponseField>
 
 <ResponseField name="details" type="array">
@@ -52,7 +52,7 @@ All error responses wrap their payload in a top-level `error` key:
 | 404         | `not_found`           | The requested resource does not exist                    |
 | 409         | `conflict`            | The request conflicts with existing data                 |
 | 422         | `validation_error`    | Input failed validation rules                            |
-| 429         | `rate_limit_exceeded` | Too many requests; slow down                             |
+| 429         | `rate_limit_exceeded` | Too many requests; wait and retry using exponential backoff |
 | 500         | `internal_error`      | Unexpected server-side error                             |
 | 503         | `service_unavailable` | API temporarily unavailable                              |
 
