@@ -1,0 +1,78 @@
+---
+title: "API Rate Limits and Request Quotas"
+sidebarTitle: "Rate Limits"
+description: "Learn about Google API rate limits, how to read rate limit headers, handle 429 errors, and design your integration to stay within quota."
+---
+
+The Google API enforces rate limits per API key to ensure fair usage and platform stability for all integrations. If your integration sends requests faster than your plan allows, the API returns a `429 Too Many Requests` response. Understanding how limits work — and building your client to handle them gracefully — keeps your integration resilient and your users unaffected.
+
+## Default limits
+
+Rate limits depend on your plan. The following quotas apply per API key:
+
+| Plan | Requests per minute | Requests per day |
+|------|--------------------|--------------------|
+| Free | 60 | 1,000 |
+| Pro | 600 | 50,000 |
+| Enterprise | 6,000 | Unlimited |
+
+Both limits are enforced independently. Exceeding either one triggers a `429` response until the window resets.
+
+## Rate limit headers
+
+Every response from the Google API includes three headers that tell you exactly where you stand against your quota:
+
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1705312260
+```
+
+- **`X-RateLimit-Limit`** — The maximum number of requests you can make per minute on your current plan.
+- **`X-RateLimit-Remaining`** — The number of requests you have left in the current one-minute window.
+- **`X-RateLimit-Reset`** — A Unix timestamp indicating when the current window resets and your remaining count returns to the limit.
+
+Read these headers proactively in your client to slow down before you hit the limit, rather than reacting to `429` errors after the fact.
+
+## Handling 429 errors
+
+When you exceed your rate limit, the API responds with a `429` status and a JSON body that tells you how long to wait:
+
+```json
+{
+  "error": {
+    "code": "rate_limit_exceeded",
+    "message": "You have exceeded your request rate limit. Please retry after the reset window.",
+    "retry_after": 15
+  }
+}
+```
+
+The `retry_after` value is the number of seconds to wait before sending the next request. For a more robust implementation, use **exponential backoff** so that repeated `429` responses don't hammer the API as soon as the window opens:
+
+```python
+import time, requests
+
+def api_request_with_retry(url, headers, max_retries=3):
+    for attempt in range(max_retries):
+        response = requests.get(url, headers=headers)
+        if response.status_code == 429:
+            wait = 2 ** attempt
+            time.sleep(wait)
+            continue
+        return response
+    raise Exception("Max retries exceeded")
+```
+
+This example waits 1 second after the first `429`, 2 seconds after the second, and 4 seconds after the third before giving up. Adjust `max_retries` and the base wait time to suit your latency requirements.
+
+<Tip>
+  Two of the easiest ways to stay within your quota are **caching responses** and **batching requests**. If the same resource is requested frequently, store the response locally and revalidate only when necessary. Where the API supports bulk operations, send a single request instead of many individual ones — you'll use fewer requests and reduce latency at the same time.
+</Tip>
+
+## Increasing your limits
+
+If your integration consistently approaches or exceeds your plan's quota, you have two options:
+
+- **Upgrade your plan** — Moving from Free to Pro or from Pro to Enterprise multiplies your per-minute and per-day limits significantly. You can upgrade at any time from your [dashboard settings](https://dashboard.google.com/settings/billing), and new limits take effect immediately.
+- **Contact support** — Enterprise customers with workloads that exceed standard limits can request a custom quota increase. Reach out to [support@google.com](mailto:support@google.com) with your use case and expected request volume, and the team will work with you on a solution.

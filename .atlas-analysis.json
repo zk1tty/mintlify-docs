@@ -1,17 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
+  "projectType": "api-service",
+  "projectName": "Google",
+  "projectDescription": "A simple, developer-friendly API service for building and integrating powerful features into your product.",
   "theme": "luma",
-  "name": "Google",
-  "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
-  },
-  "favicon": "/favicon.svg",
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
+  "primaryColor": "#ef7025",
+  "lightColor": "#eec9bc",
+  "darkColor": "#4fa1ab",
   "navigation": {
     "tabs": [
       {
@@ -76,22 +70,22 @@
       }
     ]
   },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:support@google.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Get Started",
-      "href": "/quickstart"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/google"
-    }
-  }
+  "keyFeatures": [
+    "Simple REST API with predictable resource-oriented URLs",
+    "Secure API key authentication",
+    "JSON request and response bodies",
+    "Comprehensive error codes and messages",
+    "Webhook support for real-time event notifications",
+    "Pagination for list endpoints",
+    "Rate limiting with clear headers"
+  ],
+  "publicApiSurface": [
+    "GET /resources — list resources",
+    "POST /resources — create a resource",
+    "GET /resources/{id} — retrieve a resource",
+    "PATCH /resources/{id} — update a resource",
+    "DELETE /resources/{id} — delete a resource",
+    "POST /webhooks — register a webhook endpoint",
+    "Authentication via Bearer token in Authorization header"
+  ]
 }

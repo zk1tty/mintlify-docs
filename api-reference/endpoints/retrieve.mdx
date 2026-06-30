@@ -1,0 +1,83 @@
+---
+title: "GET /resources/{id} — Retrieve a Resource"
+sidebarTitle: "Retrieve Resource"
+description: "Fetch a single resource by its ID. Returns the full resource object including all fields and metadata."
+---
+
+Use `GET /resources/{id}` to fetch a specific resource by its unique ID. The response includes the complete resource object — all fields, metadata, and timestamps — exactly as stored.
+
+```
+GET https://api.google.com/v1/resources/{id}
+```
+
+## Path parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the resource to retrieve (for example, `res_01J9KXPQ3N2M4R5T6W7Y8Z`). IDs are returned when you create or list resources.
+</ParamField>
+
+## Example request
+
+```bash
+curl https://api.google.com/v1/resources/res_01J9KXPQ3N2M4R5T6W7Y8Z \
+  -H "Authorization: Bearer $GOOGLE_API_KEY"
+```
+
+## Response
+
+A successful request returns HTTP `200` with the resource object nested under `data`.
+
+<ResponseField name="data" type="object">
+  The full resource object.
+
+  <Expandable title="data fields">
+    <ResponseField name="data.id" type="string">
+      The unique identifier assigned to this resource.
+    </ResponseField>
+
+    <ResponseField name="data.name" type="string">
+      The display name of the resource.
+    </ResponseField>
+
+    <ResponseField name="data.description" type="string">
+      The optional description attached to the resource.
+    </ResponseField>
+
+    <ResponseField name="data.status" type="string">
+      The current status of the resource: `active` or `inactive`.
+    </ResponseField>
+
+    <ResponseField name="data.metadata" type="object">
+      The key-value pairs associated with this resource.
+    </ResponseField>
+
+    <ResponseField name="data.created_at" type="string">
+      ISO 8601 timestamp for when the resource was created.
+    </ResponseField>
+
+    <ResponseField name="data.updated_at" type="string">
+      ISO 8601 timestamp for when the resource was last updated.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```json
+{
+  "data": {
+    "id": "res_01J9KXPQ3N2M4R5T6W7Y8Z",
+    "name": "My New Resource",
+    "description": "Created via the API",
+    "status": "active",
+    "metadata": { "project": "demo" },
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  },
+  "meta": { "request_id": "req_def456" }
+}
+```
+
+## Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `404 Not Found` | `resource_not_found` | No resource exists with the provided ID. Verify the ID is correct and belongs to your account. |

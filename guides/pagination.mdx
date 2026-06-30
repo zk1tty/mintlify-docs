@@ -1,0 +1,88 @@
+---
+title: "Paginating Through API Results"
+sidebarTitle: "Pagination"
+description: "Learn how to use cursor-based and page-based pagination to retrieve large result sets from the Google API."
+---
+
+List endpoints in the Google API return paginated results to keep responses fast and manageable. Rather than dumping every matching record into a single response, the API breaks results into pages — you control the page size and navigate through the full set using the pagination metadata included in every response.
+
+## Pagination parameters
+
+Pass these query parameters on any list endpoint to control which page of results you receive:
+
+| Parameter  | Type    | Default | Description                          |
+|------------|---------|---------|--------------------------------------|
+| `page`     | integer | `1`     | Page number to retrieve              |
+| `per_page` | integer | `20`    | Results per page (maximum `100`)     |
+
+## Pagination response fields
+
+Every list response includes a `pagination` object alongside the `data` array so you always know exactly where you are in the full result set:
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "per_page": 20,
+    "total": 143,
+    "total_pages": 8
+  }
+}
+```
+
+- **`page`** — The current page number you requested.
+- **`per_page`** — The number of results returned on this page.
+- **`total`** — The total number of records matching your query across all pages.
+- **`total_pages`** — The total number of pages available given the current `per_page` value. When `page` equals `total_pages`, you have reached the last page.
+
+## Fetching a specific page
+
+Append `page` and `per_page` as query parameters to jump directly to any page in the result set:
+
+```bash
+curl 'https://api.google.com/v1/resources?page=2&per_page=50' \
+  -H "Authorization: Bearer $GOOGLE_API_KEY"
+```
+
+This request retrieves the second page of results with up to 50 items per page. Adjust both parameters freely to match your use case — for example, use a large `per_page` value when you need bulk data, or a small one when displaying results in a UI.
+
+## Iterating all pages
+
+To retrieve every record in a result set, loop through pages until you've processed the last one. The following Python example collects all resources into a single list:
+
+```python
+import os, requests
+
+api_key = os.environ['GOOGLE_API_KEY']
+base_url = 'https://api.google.com/v1/resources'
+headers = {'Authorization': f'Bearer {api_key}'}
+
+all_resources = []
+page = 1
+
+while True:
+    response = requests.get(
+        base_url,
+        headers=headers,
+        params={'page': page, 'per_page': 100}
+    )
+    response.raise_for_status()
+    body = response.json()
+
+    all_resources.extend(body['data'])
+
+    pagination = body['pagination']
+    if page >= pagination['total_pages']:
+        break  # No more pages remaining
+
+    page += 1
+
+print(f"Retrieved {len(all_resources)} resources total.")
+```
+
+The loop requests the maximum `per_page` value of `100` to minimise the number of round trips, then checks whether the current `page` has reached `total_pages` before deciding to continue.
+
+<Tip>
+  If you're iterating all pages to build a local view of your data, consider caching the results and storing the `total` count. Re-fetching pages you've already processed wastes quota and slows your application — instead, track the last `page` you successfully processed and resume from there on subsequent runs.
+</Tip>

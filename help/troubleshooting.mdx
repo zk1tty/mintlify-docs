@@ -1,0 +1,51 @@
+---
+title: "Troubleshoot Common Google API Issues"
+sidebarTitle: "Troubleshooting"
+description: "Diagnose and fix common problems with Google API requests, including auth errors, 404s, rate limits, and webhook delivery failures."
+---
+
+When something goes wrong with your Google API integration, a clear diagnosis is half the battle. This guide walks you through the most common issues developers encounter — from authentication failures and malformed requests to webhook delivery problems — and shows you exactly how to resolve each one quickly.
+
+<AccordionGroup>
+  <Accordion title="401 Unauthorized">
+    A `401` response means your API key is either missing from the request or is malformed. Check that you are sending the key in the `Authorization` header using the correct format:
+
+    ```http
+    Authorization: Bearer YOUR_API_KEY
+    ```
+
+    Verify that the key is still active by navigating to **Settings > API Keys** in your dashboard. A key that has been revoked or expired will also trigger this error.
+  </Accordion>
+
+  <Accordion title="403 Forbidden">
+    A `403` response means your API key was recognized but does not have permission to perform the requested action. Open your dashboard, go to **Settings > API Keys**, and review the scopes assigned to your key. Enable the scopes required for the endpoint you are calling, then retry your request.
+  </Accordion>
+
+  <Accordion title="404 Not Found">
+    A `404` response means the API could not locate the resource you requested. The most common causes are an incorrect resource ID or a typo in the URL path. Before sending your request, print the full constructed URL to your console and compare it carefully against the API reference. Confirm that the resource you are targeting actually exists in your account.
+  </Accordion>
+
+  <Accordion title="429 Too Many Requests">
+    A `429` response means you have hit your rate limit. To recover gracefully, implement **exponential backoff** — wait a short interval before retrying, and double the wait time after each failed attempt. Check the `X-RateLimit-Remaining` header on your responses to monitor your remaining quota in real time. If you are consistently hitting the limit, consider upgrading your plan from the **Billing** section of your dashboard.
+  </Accordion>
+
+  <Accordion title="422 Validation Error">
+    A `422` response means the server understood your request but rejected it because the body contains missing or invalid fields. Inspect the `details` array in the error response — it lists each offending field along with a human-readable description of the problem. Correct those fields in your request payload and resubmit.
+  </Accordion>
+
+  <Accordion title="Webhook not receiving events">
+    If your webhook endpoint is not receiving events, work through the following checks:
+
+    1. **Public accessibility** — confirm your endpoint URL is reachable from the public internet. Local or firewalled URLs will not work.
+    2. **HTTP 200 response** — your endpoint must respond with a `200 OK` status. Any other status code causes the Google API to treat the delivery as failed.
+    3. **Retry attempts** — open the **Webhooks** section of your dashboard and inspect the delivery log for your endpoint. Failed delivery attempts are listed there along with the response your server returned, which can help you pinpoint the issue.
+  </Accordion>
+
+  <Accordion title="Request times out">
+    If your request is timing out, start by checking your local network connectivity and any firewall rules that might be blocking outbound HTTPS traffic. The Google API enforces a **30-second server-side timeout** — if your operation takes longer than that, the connection is closed. To work around this, break large operations into smaller, discrete requests that each complete well within the timeout window.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  When contacting support about a failed request, always include the `request_id` field from the error response. This ID lets our team locate the exact request in our logs and dramatically speeds up the investigation.
+</Note>

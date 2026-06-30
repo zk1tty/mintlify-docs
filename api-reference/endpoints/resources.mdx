@@ -1,0 +1,101 @@
+---
+title: "GET /resources — List All Resources"
+sidebarTitle: "List Resources"
+description: "Retrieve a paginated list of all resources. Supports filtering by status, sorting, and pagination using page and per_page parameters."
+---
+
+Use `GET /resources` to retrieve a paginated list of all resources in your account. You can narrow results by status, control the sort order, and page through large datasets using the `page` and `per_page` query parameters.
+
+```
+GET https://api.google.com/v1/resources
+```
+
+## Query parameters
+
+<ParamField query="page" type="integer" default={1}>
+  The page number to retrieve. Starts at `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default={20}>
+  The number of results to return per page. Maximum value is `100`.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter resources by status. Accepted values: `active`, `inactive`.
+</ParamField>
+
+<ParamField query="sort" type="string">
+  The field to sort results by. Accepted values: `created_at`, `updated_at`, `name`.
+</ParamField>
+
+<ParamField query="order" type="string">
+  The sort direction. Accepted values: `asc`, `desc`.
+</ParamField>
+
+## Example request
+
+```bash
+curl 'https://api.google.com/v1/resources?page=1&per_page=10&status=active' \
+  -H "Authorization: Bearer $GOOGLE_API_KEY"
+```
+
+## Response
+
+A successful request returns HTTP `200` with a JSON body containing a `data` array of resource objects and a `pagination` object.
+
+<ResponseField name="data" type="array">
+  The list of resource objects matching your query.
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Metadata describing the current page and total result set.
+
+  <Expandable title="pagination fields">
+    <ResponseField name="pagination.page" type="integer">
+      The current page number.
+    </ResponseField>
+
+    <ResponseField name="pagination.per_page" type="integer">
+      The number of results returned on this page.
+    </ResponseField>
+
+    <ResponseField name="pagination.total" type="integer">
+      The total number of resources matching your query.
+    </ResponseField>
+
+    <ResponseField name="pagination.total_pages" type="integer">
+      The total number of pages available at the current `per_page` setting.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```json
+{
+  "data": [
+    {
+      "id": "res_01J9KXPQ3N2M4R5T6W7Y8Z",
+      "name": "Primary Resource",
+      "description": "Our main production resource",
+      "status": "active",
+      "metadata": { "project": "demo" },
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "res_02K0LYRQ4O3N5S6U7X8A9B",
+      "name": "Secondary Resource",
+      "description": "Backup resource for staging",
+      "status": "active",
+      "metadata": { "project": "staging" },
+      "created_at": "2024-01-14T08:00:00Z",
+      "updated_at": "2024-01-14T09:15:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "per_page": 10,
+    "total": 42,
+    "total_pages": 5
+  }
+}
+```

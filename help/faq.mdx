@@ -1,0 +1,41 @@
+---
+title: "Frequently Asked Questions about Google API"
+sidebarTitle: "FAQ"
+description: "Answers to common questions about Google API authentication, rate limits, billing, and supported features."
+---
+
+Whether you're just getting started or scaling your integration, this page gives you quick answers to the most common questions developers ask about the Google API — from obtaining your first API key to understanding rate limits, billing options, and supported data formats.
+
+<AccordionGroup>
+  <Accordion title="How do I get an API key?">
+    To get an API key, sign up for a Google API account at our website. Once you're logged in, navigate to **Settings > API Keys** and click **New API Key**. Your key is generated instantly and ready to use in your requests.
+  </Accordion>
+
+  <Accordion title="Are my API keys tied to a specific environment?">
+    Yes. Each API key is scoped to a specific environment. You should create separate keys for development, staging, and production to keep your environments isolated and avoid accidentally affecting live data during testing.
+  </Accordion>
+
+  <Accordion title="What happens if I exceed my rate limit?">
+    When you exceed your rate limit, the API returns a `429 Too Many Requests` response. You should implement a retry strategy using exponential backoff — wait a short interval, then retry, doubling the wait time on each subsequent failure. Monitor the `X-RateLimit-Remaining` header to proactively track your usage.
+  </Accordion>
+
+  <Accordion title="Can I have multiple API keys?">
+    Yes, you can create up to **10 API keys** per account. Having multiple keys is useful for separating concerns across services, environments, or team members, and makes it easier to rotate or revoke individual keys without disrupting your entire integration.
+  </Accordion>
+
+  <Accordion title="How do I upgrade my plan?">
+    To upgrade your plan, visit the **Billing** section of your dashboard. From there you can review available plans, compare rate limits and feature access, and complete your upgrade with a few clicks. Changes take effect immediately after purchase.
+  </Accordion>
+
+  <Accordion title="What data formats does the API support?">
+    The Google API exclusively uses **JSON** for both request bodies and responses. Make sure your requests include the `Content-Type: application/json` header and that your client is configured to parse JSON responses.
+  </Accordion>
+
+  <Accordion title="How do I delete a resource permanently?">
+    Send a `DELETE` request to `/resources/{id}`, replacing `{id}` with the unique identifier of the resource you want to remove. **Deletion is permanent and cannot be undone** — there is no soft-delete or trash bin. Double-check the resource ID before executing the request.
+  </Accordion>
+
+  <Accordion title="How do I contact support?">
+    You can reach the support team by emailing [support@google.com](mailto:support@google.com) or by opening a support ticket directly from the **Support** section of your dashboard. Include as much detail as possible — especially the `request_id` from any error responses — to help us resolve your issue quickly.
+  </Accordion>
+</AccordionGroup>

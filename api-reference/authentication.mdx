@@ -1,0 +1,76 @@
+---
+title: "Authenticate Google API Requests"
+sidebarTitle: "Authentication"
+description: "Pass your API key as a Bearer token in the Authorization header. All Google API endpoints require authentication unless noted otherwise."
+---
+
+Every request to the Google API must include your API key as a Bearer token in the `Authorization` header. Requests without a valid key are rejected with a `401 Unauthorized` response before they reach any endpoint logic.
+
+## Header format
+
+Pass your API key using the standard HTTP Bearer scheme:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Example request
+
+```bash
+curl https://api.google.com/v1/resources \
+  -H "Authorization: Bearer sk_live_abc123xyz"
+```
+
+## API key types
+
+Google issues two types of API keys. Use the right key for the right environment to avoid accidental changes to production data.
+
+| Type      | Prefix      | Use                          |
+|-----------|-------------|------------------------------|
+| Live key  | `sk_live_`  | Production use               |
+| Test key  | `sk_test_`  | Development and testing      |
+
+## API key scopes
+
+Each API key is issued with one or more scopes that control what actions it can perform. If a key lacks the required scope for an endpoint, the API returns a `403 Forbidden` error.
+
+| Scope      | Description                                   |
+|------------|-----------------------------------------------|
+| `read`     | Can read resources                            |
+| `write`    | Can create and update resources               |
+| `delete`   | Can delete resources                          |
+| `webhooks` | Can manage webhook endpoints                  |
+
+## Authentication errors
+
+When authentication fails, the API returns a structured error body. The two most common cases are a missing or malformed key (`401`) and a valid key that lacks the required scope (`403`).
+
+**401 — Missing or invalid API key:**
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Missing or invalid API key",
+    "status": 401,
+    "request_id": "req_abc123"
+  }
+}
+```
+
+**403 — Insufficient permissions:**
+
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Your API key does not have the required scope for this action",
+    "status": 403,
+    "request_id": "req_def456"
+  }
+}
+```
+
+<Warning>
+  Never expose live API keys in client-side code, mobile apps, or public repositories. Anyone with your live key can make authenticated requests on your behalf. Use test keys (`sk_test_`) during development and restrict live key access to server-side environments only.
+</Warning>

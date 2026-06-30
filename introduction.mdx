@@ -1,0 +1,50 @@
+---
+title: "Google API: Developer-Friendly REST Integration"
+sidebarTitle: "Introduction"
+description: "Google API is a simple, resource-oriented REST service. Learn what you can build, how the API is structured, and how to get access."
+---
+
+Google API is a resource-oriented REST service built for developers who want to integrate powerful functionality without fighting their tools. It speaks JSON, authenticates with API keys you already understand, and follows the conventions — predictable URLs, standard HTTP verbs, and consistent error shapes — that let you move fast and stay focused on your product. Whether you're building an internal tool, a customer-facing integration, or an automated pipeline, Google API gives you a reliable, well-documented foundation to build on.
+
+## What you can do with Google API
+
+Google API covers the full range of capabilities you need to build production-grade integrations from day one.
+
+<CardGroup cols={2}>
+  <Card title="REST Resources" icon="database">
+    Every feature is modeled as a resource with a clean URL structure. Use standard HTTP methods — GET, POST, PATCH, DELETE — to read and manipulate data predictably.
+  </Card>
+  <Card title="JSON Responses" icon="brackets-curly">
+    Every response body is JSON. Data comes back in a consistent envelope with a `data` field for your payload and metadata fields for pagination and errors.
+  </Card>
+  <Card title="API Key Authentication" icon="key">
+    Authenticate every request by passing your API key as a Bearer token in the `Authorization` header. No OAuth flows required for server-to-server use cases.
+  </Card>
+  <Card title="Webhooks" icon="webhook">
+    Subscribe to events and receive real-time HTTP callbacks when something changes. Stop polling and let Google API push updates to you instead.
+  </Card>
+  <Card title="Pagination" icon="list">
+    Large collections are paginated automatically. Use the `page` and `per_page` query parameters to page through results and the `pagination` response object to track your position.
+  </Card>
+  <Card title="Rate Limits" icon="gauge-high">
+    Every API key comes with generous rate limits. Response headers tell you exactly how many requests you have remaining so you can throttle gracefully and avoid interruptions.
+  </Card>
+</CardGroup>
+
+## How it works
+
+Every interaction with Google API follows the same request/response model. You send an HTTPS request to a resource URL — for example, `https://api.google.com/v1/resources` — with your API key in the `Authorization` header. The API authenticates your key, executes the operation, and returns a JSON response with an HTTP status code that reflects the outcome.
+
+Successful responses use `2xx` status codes and include your data in a `data` field. Error responses use the appropriate `4xx` or `5xx` code and include a structured `error` object with a machine-readable `code`, a human-readable `message`, and the HTTP `status`. This consistent shape means you can write error-handling logic once and reuse it across every endpoint in the API.
+
+## Base URL
+
+All API requests are made to the following base URL. Every endpoint path you see in the reference is appended to this root.
+
+```
+https://api.google.com/v1
+```
+
+<Note>
+  Ready to make your first request? Follow the [Quickstart](/quickstart) to generate your API key and get a live response in under five minutes.
+</Note>

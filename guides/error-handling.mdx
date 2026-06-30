@@ -1,0 +1,110 @@
+---
+title: "Handle Google API Errors Gracefully"
+sidebarTitle: "Error Handling"
+description: "Learn how to identify, interpret, and recover from errors returned by the Google API, including authentication, validation, and rate limit errors."
+---
+
+The Google API uses standard HTTP status codes and structured JSON error bodies to help you diagnose and handle problems in your integration. Every error response follows the same predictable shape, so you can write a single error-handling path that covers authentication failures, validation issues, rate limiting, and server errors alike.
+
+## Error response format
+
+When a request fails, the API returns a JSON body with a top-level `error` object:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Resource with id res_abc123 was not found",
+    "status": 404,
+    "request_id": "req_xyz789"
+  }
+}
+```
+
+Each field tells you something specific about what went wrong:
+
+- **`code`** — A machine-readable string that identifies the error type. Use this in your code to branch your error-handling logic (e.g. `"not_found"`, `"unauthorized"`, `"rate_limit_exceeded"`).
+- **`message`** — A human-readable explanation of the error, suitable for logging or displaying in a developer-facing UI.
+- **`status`** — The HTTP status code echoed in the body for convenience, so you don't need to inspect response headers separately.
+- **`request_id`** — A unique identifier for the specific request that failed. Include this when contacting support — it allows the team to look up exactly what happened on the server side.
+
+## HTTP status codes
+
+The API uses the following status codes. Treat any `2xx` as success and any `4xx` or `5xx` as an error you need to handle:
+
+| Status                   | Code                  | Meaning                                     |
+|--------------------------|-----------------------|---------------------------------------------|
+| `200 OK`                 | `success`             | Request succeeded                           |
+| `201 Created`            | `success`             | Resource created successfully               |
+| `400 Bad Request`        | `bad_request`         | The request was malformed or missing fields |
+| `401 Unauthorized`       | `unauthorized`        | API key is missing or invalid               |
+| `403 Forbidden`          | `forbidden`           | API key is valid but lacks permission       |
+| `404 Not Found`          | `not_found`           | The requested resource doesn't exist        |
+| `422 Unprocessable`      | `validation_error`    | Input was received but failed validation    |
+| `429 Too Many Requests`  | `rate_limit_exceeded` | You've exceeded your rate limit             |
+| `500 Internal Error`     | `internal_error`      | An unexpected error occurred on the server  |
+
+## Retrying requests
+
+Not every error warrants a retry. Use the following rule to decide:
+
+- **Safe to retry:** `5xx` errors and `429 Too Many Requests`. These are transient — the server encountered a temporary problem or you've briefly exceeded your quota. Wait before retrying.
+- **Do not retry:** `4xx` errors (except `429`). These indicate a problem with your request itself — retrying the same malformed or unauthorized request will produce the same error.
+
+The following Python example implements exponential backoff for retryable errors:
+
+```python
+import os, time, requests
+
+api_key = os.environ['GOOGLE_API_KEY']
+headers = {'Authorization': f'Bearer {api_key}'}
+
+MAX_RETRIES = 5
+RETRY_CODES = {429, 500, 502, 503, 504}
+
+def get_with_retry(url):
+    for attempt in range(MAX_RETRIES):
+        response = requests.get(url, headers=headers)
+
+        if response.status_code not in RETRY_CODES:
+            response.raise_for_status()
+            return response.json()
+
+        wait = 2 ** attempt  # 1s, 2s, 4s, 8s, 16s
+        print(f"Attempt {attempt + 1} failed ({response.status_code}). Retrying in {wait}s...")
+        time.sleep(wait)
+
+    raise Exception(f"Request to {url} failed after {MAX_RETRIES} attempts.")
+
+data = get_with_retry('https://api.google.com/v1/resources')
+```
+
+When handling a `429`, also check for a `Retry-After` response header — the API may specify exactly how many seconds to wait before your next request.
+
+## Validation errors
+
+When you submit a request that fails field-level validation, the API returns a `422` status with a `details` array that pinpoints every field that failed:
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Validation failed",
+    "status": 422,
+    "details": [
+      { "field": "name", "issue": "is required" }
+    ]
+  }
+}
+```
+
+Each entry in `details` contains:
+
+- **`field`** — The name of the request body field that failed validation.
+- **`issue`** — A plain-language description of why it failed (e.g. `"is required"`, `"must be a positive integer"`, `"exceeds maximum length of 255"`).
+
+Iterate over `details` to surface all validation problems to your users in a single pass rather than correcting one field at a time.
+
+<Tip>
+  Always log the `request_id` from every error response your application encounters. When you reach out to support with a bug report, providing the `request_id` allows the team to retrieve the full server-side trace for that exact request — dramatically speeding up diagnosis.
+</Tip>

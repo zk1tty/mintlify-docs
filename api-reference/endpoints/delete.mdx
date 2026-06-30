@@ -1,0 +1,43 @@
+---
+title: "DELETE /resources/{id} — Delete a Resource"
+sidebarTitle: "Delete Resource"
+description: "Permanently delete a resource by its ID. This action cannot be undone. Returns HTTP 204 with no body on success."
+---
+
+Use `DELETE /resources/{id}` to permanently delete a resource from your account. This action is irreversible — once deleted, the resource and all associated metadata cannot be recovered. If you are unsure, consider setting the resource's status to `inactive` first.
+
+```
+DELETE https://api.google.com/v1/resources/{id}
+```
+
+## Path parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the resource to delete (for example, `res_01J9KXPQ3N2M4R5T6W7Y8Z`).
+</ParamField>
+
+## Example request
+
+```bash
+curl -X DELETE https://api.google.com/v1/resources/res_01J9KXPQ3N2M4R5T6W7Y8Z \
+  -H "Authorization: Bearer $GOOGLE_API_KEY"
+```
+
+## Response
+
+A successful deletion returns HTTP `204 No Content` with an empty response body. No JSON is returned.
+
+```
+HTTP/1.1 204 No Content
+```
+
+<Warning>
+  Deletion is **permanent and cannot be undone**. There is no trash or recovery mechanism. If you are not certain you want to remove the resource, update its `status` to `inactive` instead — this hides it from active listings while preserving the data.
+</Warning>
+
+## Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `404 Not Found` | `resource_not_found` | No resource exists with the provided ID. Verify the ID is correct and belongs to your account. |
+| `403 Forbidden` | `insufficient_scope` | Your API key does not have the `resources:delete` scope required to perform deletions. Generate a new key with the appropriate permissions in your dashboard. |

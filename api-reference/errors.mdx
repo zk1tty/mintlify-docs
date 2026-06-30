@@ -1,0 +1,80 @@
+---
+title: "Google API Error Codes and Responses"
+sidebarTitle: "Errors"
+description: "Complete reference for Google API error codes, HTTP status codes, and the JSON error response format including validation and rate limit errors."
+---
+
+When something goes wrong, the Google API returns a structured JSON error body alongside an appropriate HTTP status code. Every error response follows the same shape, so you can write a single error-handling path in your integration and handle all failure cases consistently.
+
+## Error object
+
+All error responses wrap their payload in a top-level `error` key:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Resource with id res_abc123 was not found",
+    "status": 404,
+    "request_id": "req_xyz789",
+    "details": []
+  }
+}
+```
+
+<ResponseField name="code" type="string">
+  Machine-readable error code that identifies the specific failure type. Use this field in your code to branch on error conditions.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable description of the error. Suitable for logging; do not display raw API error messages directly to end users.
+</ResponseField>
+
+<ResponseField name="status" type="integer">
+  HTTP status code associated with this error. Mirrors the HTTP response status code.
+</ResponseField>
+
+<ResponseField name="request_id" type="string">
+  Unique identifier for this request. Include this value when contacting support — it allows the Google team to locate the exact request in internal logs.
+</ResponseField>
+
+<ResponseField name="details" type="array">
+  Array of additional detail objects. Populated for validation errors to indicate exactly which fields failed and why. Empty array for all other error types.
+</ResponseField>
+
+## Error codes reference
+
+| HTTP Status | Code                  | Description                                              |
+|-------------|-----------------------|----------------------------------------------------------|
+| 400         | `bad_request`         | The request is malformed or missing required fields      |
+| 401         | `unauthorized`        | Missing or invalid API key                               |
+| 403         | `forbidden`           | API key lacks required permissions                       |
+| 404         | `not_found`           | The requested resource does not exist                    |
+| 409         | `conflict`            | The request conflicts with existing data                 |
+| 422         | `validation_error`    | Input failed validation rules                            |
+| 429         | `rate_limit_exceeded` | Too many requests; slow down                             |
+| 500         | `internal_error`      | Unexpected server-side error                             |
+| 503         | `service_unavailable` | API temporarily unavailable                              |
+
+## Validation error details
+
+When the API returns a `422 validation_error`, the `details` array is populated with one object per failing field. Each object includes the field name and a human-readable description of the validation rule that was violated.
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "status": 422,
+    "details": [
+      { "field": "name", "issue": "is required" },
+      { "field": "status", "issue": "must be one of: active, inactive" }
+    ]
+  }
+}
+```
+
+Iterate over `details` to surface per-field feedback in your UI, or log the full array to help diagnose which inputs your integration is sending incorrectly.
+
+<Tip>
+  Always log the `request_id` from every error response in your error handlers. When you contact Google support, providing the `request_id` allows the team to pull up the exact request instantly — cutting resolution time significantly.
+</Tip>

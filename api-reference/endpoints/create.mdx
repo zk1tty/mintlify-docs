@@ -1,0 +1,66 @@
+---
+title: "POST /resources — Create a New Resource"
+sidebarTitle: "Create Resource"
+description: "Create a new resource. Provide a name and optional fields; returns the created resource object with its assigned ID and timestamps."
+---
+
+Use `POST /resources` to create a new resource in your account. You must provide a `name`; all other fields are optional. On success, the API returns the full resource object including its system-assigned ID and timestamps.
+
+```
+POST https://api.google.com/v1/resources
+```
+
+## Request body
+
+<ParamField body="name" type="string" required>
+  The display name for the resource. Must be between 1 and 255 characters.
+</ParamField>
+
+<ParamField body="description" type="string">
+  An optional human-readable description of the resource.
+</ParamField>
+
+<ParamField body="status" type="string" default="active">
+  The initial status of the resource. Accepted values: `active`, `inactive`. Defaults to `active`.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  An optional set of key-value pairs you can attach to the resource for your own tracking purposes. You may include up to 20 pairs; both keys and values must be strings.
+</ParamField>
+
+## Example request
+
+```bash
+curl -X POST https://api.google.com/v1/resources \
+  -H "Authorization: Bearer $GOOGLE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My New Resource",
+    "description": "Created via the API",
+    "status": "active",
+    "metadata": { "project": "demo" }
+  }'
+```
+
+## Response
+
+A successful request returns HTTP `201 Created` with the newly created resource object nested under `data`.
+
+```json
+{
+  "data": {
+    "id": "res_01J9KXPQ3N2M4R5T6W7Y8Z",
+    "name": "My New Resource",
+    "description": "Created via the API",
+    "status": "active",
+    "metadata": { "project": "demo" },
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  },
+  "meta": { "request_id": "req_abc123" }
+}
+```
+
+<Note>
+  To safely retry a creation request without risking duplicate resources, include an `Idempotency-Key` header with a unique value (for example, a UUID you generate client-side). If the API receives a second request with the same key within 24 hours, it returns the original response instead of creating a new resource.
+</Note>

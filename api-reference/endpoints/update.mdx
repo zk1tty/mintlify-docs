@@ -1,0 +1,69 @@
+---
+title: "PATCH /resources/{id} — Update a Resource"
+sidebarTitle: "Update Resource"
+description: "Update one or more fields on an existing resource. Only the fields you include are modified; omitted fields remain unchanged."
+---
+
+Use `PATCH /resources/{id}` to update an existing resource. The API uses partial updates — only the fields you include in the request body are changed. Fields you omit remain exactly as they were, so you never need to re-send the full resource object.
+
+```
+PATCH https://api.google.com/v1/resources/{id}
+```
+
+## Path parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the resource to update (for example, `res_01J9KXPQ3N2M4R5T6W7Y8Z`).
+</ParamField>
+
+## Request body
+
+All body fields are optional. Include only the fields you want to change.
+
+<ParamField body="name" type="string">
+  A new display name for the resource. Must be between 1 and 255 characters.
+</ParamField>
+
+<ParamField body="description" type="string">
+  A new description for the resource. Pass an empty string (`""`) to clear an existing description.
+</ParamField>
+
+<ParamField body="status" type="string">
+  The new status for the resource. Accepted values: `active`, `inactive`.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  A set of key-value pairs to merge into the resource's existing metadata. New keys are added; existing keys are overwritten with the provided values. Keys are not deleted unless you explicitly pass a `null` value for them.
+</ParamField>
+
+## Example request
+
+```bash
+curl -X PATCH https://api.google.com/v1/resources/res_01J9KXPQ3N2M4R5T6W7Y8Z \
+  -H "Authorization: Bearer $GOOGLE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "inactive", "metadata": {"archived": "true"}}'
+```
+
+## Response
+
+A successful request returns HTTP `200` with the full updated resource object nested under `data`.
+
+```json
+{
+  "data": {
+    "id": "res_01J9KXPQ3N2M4R5T6W7Y8Z",
+    "name": "My New Resource",
+    "description": "Created via the API",
+    "status": "inactive",
+    "metadata": { "project": "demo", "archived": "true" },
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T11:45:00Z"
+  },
+  "meta": { "request_id": "req_ghi789" }
+}
+```
+
+<Tip>
+  Metadata updates are **merged**, not replaced. If your resource already has `{ "project": "demo" }` and you send `{ "archived": "true" }`, the result is `{ "project": "demo", "archived": "true" }`. To remove a specific key, include it in your request with a `null` value: `{ "project": null }`.
+</Tip>

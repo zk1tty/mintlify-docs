@@ -1,0 +1,72 @@
+---
+title: "Authenticate Requests to Google API"
+sidebarTitle: "Authentication"
+description: "Google API uses API keys passed as Bearer tokens. Learn how to generate your key, pass it in requests, and rotate or revoke it when needed."
+---
+
+Google API authenticates every request using an API key that you pass in the `Authorization` header as a Bearer token. There are no OAuth flows, session cookies, or SDK initializations to manage — just a single secret string that travels with each HTTPS request. If the key is valid and active, your request proceeds. If it's missing, expired, or revoked, the API returns a `401` error with a clear message. This simplicity makes Google API fast to integrate and easy to debug.
+
+## Get your API key
+
+You generate and manage API keys from the Google developer dashboard. Each key is scoped to your account and can be labeled to reflect its purpose or environment.
+
+1. Log in to your account at [dashboard.google.com](https://dashboard.google.com).
+2. Navigate to **Settings → API Keys**.
+3. Click **New API Key**, enter a descriptive name (for example, `production` or `staging`), and click **Create**.
+4. Copy the key displayed on screen. This is the only time the full key value is shown — store it securely before closing the dialog.
+
+## Pass your key in requests
+
+Include your API key in the `Authorization` header of every request using the `Bearer` scheme.
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+Here's a complete example using curl:
+
+```bash
+curl https://api.google.com/v1/resources \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+The header must be present on every request. Requests that omit the `Authorization` header or provide a malformed value are rejected immediately without reaching any business logic.
+
+<Warning>
+  Never expose your API key in client-side code (browser JavaScript, mobile apps) or commit it to a public repository. Client-side environments are inherently untrusted — any user can inspect the network traffic or source code and extract the key. Use your API key exclusively in server-side code, environment variables, or secrets management systems. If a key is ever compromised, revoke it immediately and generate a replacement.
+</Warning>
+
+## Rotate or revoke keys
+
+You should rotate API keys periodically and immediately any time you suspect a key has been exposed.
+
+**To rotate a key**, generate a new one from **Settings → API Keys** in the dashboard. Update your application's environment variable or secrets store to reference the new key, deploy the change, and then delete the old key once you've confirmed the new one is working. This zero-downtime rotation pattern ensures your integration stays live throughout the process.
+
+**To revoke a key**, open **Settings → API Keys**, find the key you want to remove, and click **Delete**. Revocation takes effect immediately — any in-flight requests using that key will receive a `401` response. Keep this in mind when coordinating rotations in production environments.
+
+## Authentication errors
+
+When a request fails authentication, the API responds with HTTP `401` and a JSON error body that tells you exactly what went wrong.
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Invalid or missing API key",
+    "status": 401
+  }
+}
+```
+
+Common causes of authentication errors include:
+
+- **Missing header** — The `Authorization` header was not included in the request.
+- **Malformed header** — The header value doesn't follow the `Bearer YOUR_API_KEY` format.
+- **Invalid key** — The key was typed incorrectly or the value was truncated.
+- **Revoked key** — The key was deleted from the dashboard.
+
+Check the `message` field for a description of the specific problem and verify your key is being passed correctly.
+
+<Tip>
+  Store your API key in an environment variable such as `GOOGLE_API_KEY` rather than hardcoding it in your application. Reference it as `process.env.GOOGLE_API_KEY` in Node.js, `os.environ["GOOGLE_API_KEY"]` in Python, or `$GOOGLE_API_KEY` in shell scripts. This keeps secrets out of your source code and makes key rotation as simple as updating a single environment variable.
+</Tip>

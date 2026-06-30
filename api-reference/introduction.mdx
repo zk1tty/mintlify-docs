@@ -1,0 +1,63 @@
+---
+title: "Google REST API Reference"
+sidebarTitle: "Introduction"
+description: "Complete reference for the Google REST API. Covers base URL, versioning, request format, response format, and conventions used throughout the API."
+---
+
+The Google REST API gives you programmatic access to all Google resources. Whether you're managing resources, automating workflows, or integrating Google into your own product, this reference documents every endpoint, parameter, and response field you need to build with confidence.
+
+## Base URL
+
+All API requests are made to the following base URL:
+
+```
+https://api.google.com/v1
+```
+
+## Versioning
+
+The API version is included directly in the URL path. The current stable version is `v1`. When a new version is released, you can migrate at your own pace — the previous version remains fully available for **12 months** after the new version's release date, giving you ample time to update your integration without disruption.
+
+## Request format
+
+All request bodies must be valid JSON. Include the `Content-Type: application/json` header on every request that sends a body — the API will reject requests that omit it.
+
+## Response format
+
+All successful responses return JSON with two top-level keys:
+
+- **`data`** — the primary payload, either an object or an array depending on the endpoint.
+- **`meta`** — metadata about the request, including a `request_id` string that uniquely identifies the call.
+
+## Idempotency
+
+For `POST` requests, you can include an `Idempotency-Key` header with a unique client-generated value. If the request is retried with the same key within 24 hours, the API returns the original response instead of processing the request again — making it safe to retry on network failures.
+
+```bash
+curl -X POST https://api.google.com/v1/resources \
+  -H "Authorization: Bearer $GOOGLE_API_KEY" \
+  -H "Idempotency-Key: unique-client-generated-key" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My Resource"}'
+```
+
+## SDKs and client libraries
+
+Official SDKs are available for the most popular languages and frameworks, handling authentication, retries, and response parsing for you. See the [quickstart](/quickstart) for installation instructions and your first API call.
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api-reference/authentication">
+    How to pass your API key
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/api-reference/errors">
+    Error codes and responses
+  </Card>
+  <Card title="List Resources" icon="list" href="/api-reference/endpoints/resources">
+    GET /resources
+  </Card>
+  <Card title="Create Resource" icon="plus" href="/api-reference/endpoints/create">
+    POST /resources
+  </Card>
+</CardGroup>
